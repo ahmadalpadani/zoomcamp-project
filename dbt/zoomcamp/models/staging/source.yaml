@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: ecommerce_dataset
+    description: "raw data for ecommerce dataset"
+    database: ammar-zoomcamp
+    schema: ecommerce_dataset
+    tables:
+      - name: ext_customers
+      - name: ext_orders
+      - name: ext_order_items
+      - name: ext_products
+      - name: ext_product_categories  
+      - name: ext_payments
+      - name: ext_reviews
+      - name: ext_sellers
+      - name: ext_geolocations
+    

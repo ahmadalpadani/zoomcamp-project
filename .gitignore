@@ -1,2 +1,3 @@
 .env
 keys/
+dbt/dbt-env/
