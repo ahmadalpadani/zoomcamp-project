@@ -6,7 +6,7 @@ select
 
     -- order item details
     cast(shipping_limit_date as timestamp) as shipping_limit_date,
-    cast(price as float) as price,
-    cast(freight_value as float) as freight_value
+    cast(price as float64) as price,
+    cast(freight_value as float64) as freight_value
 from {{ source('ecommerce_dataset', 'ext_order_items') }}
 where order_id is not null and order_item_id is not null and product_id is not null and seller_id is not null

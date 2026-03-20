@@ -10,9 +10,9 @@ sources:
       - name: ext_orders
       - name: ext_order_items
       - name: ext_products
-      - name: ext_product_categories  
+      - name: ext_product_category_translation
       - name: ext_payments
       - name: ext_reviews
       - name: ext_sellers
-      - name: ext_geolocations
+      - name: ext_geolocation
     
