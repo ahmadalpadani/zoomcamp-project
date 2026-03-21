@@ -6,10 +6,12 @@ This project builds an End-to-End Data Pipeline to analyze the Brazilian E-Comme
 ## Problem Statement
 In the rapidly evolving e-commerce landscape, businesses struggle to gain a holistic view of their operations when data is siloed across multiple domains (customers, sellers, payments, and logistics). Specifically for Olist, a major Brazilian department store marketplace, there is a need to understand the relationship between geographic location, delivery performance, and customer satisfaction.
 
-*The Challenge:*
+**The Challenge:**
+
 Manual analysis of 100,000 orders across 2016–2018 is inefficient. Stakeholders need an automated, end-to-end pipeline that transforms raw transactional data into actionable insights.
 
-*The Solution:*
+**The Solution:**
+
 This project builds a robust data platform to answer:
 
 - Sales Trends: How do order volumes fluctuate over time across different Brazilian states?
@@ -20,13 +22,38 @@ By implementing this pipeline, Olist can identify underperforming regions and op
 
 ## Architecture & Technologies
 
-- Cloud Platform: Google Cloud Platform (GCP)
-- Infrastructure as Code: Terraform
-- Workflow Orchestration: Kestra
-- Distributed Computing: Apache Spark (Data Processing & Format Conversion)
-- Data Lake: Google Cloud Storage (GCS)
-- Data Warehouse: BigQuery
-- Transformation Layer: dbt (Data Build Tool)
-- Visualization: Looker Studio
+- **Cloud Platform**: Google Cloud Platform (GCP)
+- **Infrastructure as Code**: Terraform
+- **Workflow Orchestration**: Kestra
+- **Distributed Computing**: Apache Spark (Data Processing & Format Conversion)
+- **Data Lake**: Google Cloud Storage (GCS)
+- **Data Warehouse**: BigQuery
+- **Transformation Layer**: dbt (Data Build Tool)
+- **Visualization**: Looker Studio
+
+## How to Run Project
+
+### Prerequisites
+
+- Use Codespaces or Docker installed
+- GCP account with billing enabled
+- GCP service account with BigQuery Admin and Storage Admin roles
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com ahmadalpadani/zoomcamp-project.git
+cd zoomcamp-project
+```
+### 2. Make keys folder and input your service-account.json there and renamed gcp-key.json 
+
+### 3. Make .env file and input your POSTGRES_PASSWORD and GEMINI_API_KEY
+
+### 4. Run docker-compose
+
+```bash 
+docker-compose up
+```
+Docker help user use kestra IU
 
 
