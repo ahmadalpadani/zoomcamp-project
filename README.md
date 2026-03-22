@@ -327,7 +327,7 @@ triggers:
 
 <img width="501" height="927" alt="image" src="https://github.com/user-attachments/assets/2a13038a-6860-48ab-ab06-ba4063fd655f" />
 
-### Ingestion Table
+### Ingestion Table - Batch Pipeline
 
 | Step | Layer        | Description                                                                 |
 |------|-------------|-----------------------------------------------------------------------------|
@@ -336,7 +336,7 @@ triggers:
 | 3    | BigQuery | Create external tables and validate data availability                       |
 | 4    | DBT       | Build data models (staging → marts) and run tests for data quality          |
 
-## Spark 
+## Spark (Distributed Computing)
 
 Apache Spark is a distributed data processing engine designed to handle large-scale data efficiently by processing it in parallel across multiple machines. It enables fast data transformations, analytics, and supports both batch and real-time data processing. With APIs in languages like Python, SQL, and Scala, Spark can work with structured and unstructured data, making it a powerful tool for turning raw data into clean, usable insights at scale.
 
@@ -357,14 +357,14 @@ python3 -m venv ~/pyspark-zoomcamp-venv
 source ~/pyspark-zoomcamp-venv/bin/activate
 ```
 
-Step 3: install package 
+Step 3: Install dependencies
 
 ```bash 
 pip install --upgrade pip
 pip install pyspark jupyter pandas pyarrow
 ```
 
-### 2. Run your Spark (Distributed Computing)
+### 2. Run your Spark 
 
 ```bash 
 cd notebook
@@ -382,7 +382,112 @@ After running the ingestion and Spark jobs, your cloud storage bucket will conta
 
 ![alt text](image/image2.png)
 
+## Data Build Tools (Transformation)
 
+### 1. Install DBT-Bigquery in your Environtment Variables
 
+Step 1: Make virtual environtment
 
+```bash
+cd dbt
+python3 -m venv ~/dbt-venv
+source ~/dbt-venv/bin/activate
+```
 
+Step 2: Install dbt-bigquery
+
+```bash 
+pip install --upgrade pip
+pip install dbt-bigquery
+```
+
+Step 3: Verify Installation
+
+```bash
+dbt --version
+```
+
+Step 4: Configure dbt Profile
+
+Create a profiles.yml file in:
+
+```bash
+~/.dbt/profiles.yml
+```
+Example configuration:
+
+```bash
+zoomcamp:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: your-project-id
+      dataset: your_dataset
+      threads: 4
+      keyfile: /path/to/gcp-key.json
+```
+
+Step 5: Test Connection
+
+```bash
+dbt debug
+```
+
+## 2. Run your dbt
+
+Step 1: Move to dbt project
+
+```bash
+cd dbt/zoomcamp
+```
+
+Step 2: Install DBT Packages
+
+```bash
+dbt deps
+```
+
+Step 3: Run dbt 
+
+```bash
+dbt build
+```
+
+### DBT Architecture
+
+```bash
+macros
+  ├── get_customer_segments.sql
+  ├── get_seller_segments.sql
+  ├── get_time_segments.sql
+  └── pivot_payments.sql
+
+models
+  ├── staging
+  │     ├── source.yaml
+  │     ├── stg_customers.sql
+  │     ├── stg_geolocations.sql
+  │     ├── stg_order_items.sql
+  │     ├── stg_orders.sql
+  │     ├── stg_payments.sql
+  │     ├── stg_product_categories.sql
+  │     ├── stg_products.sql
+  │     ├── stg_reviews.sql
+  │     └── stg_sellers.sql
+  │
+  ├── intermediate
+  │     ├── int_order_enriched.sql
+  │     ├── int_order_items_geolocated.sql
+  │     ├── int_order_items_products.sql
+  │     ├── int_payments_pivoted.sql
+  │     ├── int_seller_performance.sql
+  │     └── schema.yml
+  │
+  └── mart
+        ├── dim_customer.sql
+        ├── dim_sellers.sql
+        ├── fct_order_items.sql
+        └── fct_orders.sql
+```
