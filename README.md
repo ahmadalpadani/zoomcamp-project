@@ -327,6 +327,16 @@ triggers:
 
 <img width="501" height="927" alt="image" src="https://github.com/user-attachments/assets/2a13038a-6860-48ab-ab06-ba4063fd655f" />
 
+### Ingestion Table
+
+| Step | Layer        | Description                                                                 |
+|------|-------------|-----------------------------------------------------------------------------|
+| 1    | 🟫 Bronze    | Ingest raw CSV data from source into Google Cloud Storage (data lake)       |
+| 2    | 🟪 Silver    | Transform data using Apache Spark (cleaning, trimming, schema standardization) and store as Parquet |
+| 3    | 🟨 Gold      | Organize processed data into analytics-ready Parquet datasets               |
+| 4    | ❄️ BigQuery | Create external tables and validate data availability                       |
+| 5    | ◈ dbt       | Build data models (staging → marts) and run tests for data quality          |
+
 ## Spark 
 
 Apache Spark is a distributed data processing engine designed to handle large-scale data efficiently by processing it in parallel across multiple machines. It enables fast data transformations, analytics, and supports both batch and real-time data processing. With APIs in languages like Python, SQL, and Scala, Spark can work with structured and unstructured data, making it a powerful tool for turning raw data into clean, usable insights at scale.
