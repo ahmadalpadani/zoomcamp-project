@@ -45,15 +45,43 @@ By implementing this pipeline, Olist can identify underperforming regions and op
 git clone https://github.com ahmadalpadani/zoomcamp-project.git
 cd zoomcamp-project
 ```
-### 2. Make keys folder and input your service-account.json there and renamed gcp-key.json 
+### 2. Create your GCP service account key and save it:
 
-### 3. Make .env file and input your POSTGRES_PASSWORD and GEMINI_API_KEY
+```bash
+mkdir -p keys
+# Place your service account JSON key as keys/gcp.json
+```
+
+### 3. Make .env file and input your variables
+
+```bash
+echo -e "POSTGRES_PASSWORD=your_password_here\nGEMINI_API_KEY=your_api_key_here" > .env
+```
 
 ### 4. Run docker-compose
 
 ```bash 
 docker-compose up
 ```
-Docker help user use kestra IU
+Kestra UI will be available at http://localhost:8080 (login: admin@kestra.io / Admin1234!).
+
+## Terraform 
+
+### 1. Configure Terraform 
+
+```bash
+cd terraform
+# Edit terraform.tfvars with your GCP project ID and bucket name
+```
+
+### 2. Run your Terraform 
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+Terraform will creates GCS Bucket (Datalake) named  and Bigquery Dataset (Data Warehouse)
+
 
 
