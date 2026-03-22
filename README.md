@@ -331,11 +331,10 @@ triggers:
 
 | Step | Layer        | Description                                                                 |
 |------|-------------|-----------------------------------------------------------------------------|
-| 1    | 🟫 Bronze    | Ingest raw CSV data from source into Google Cloud Storage (data lake)       |
-| 2    | 🟪 Silver    | Transform data using Apache Spark (cleaning, trimming, schema standardization) and store as Parquet |
-| 3    | 🟨 Gold      | Organize processed data into analytics-ready Parquet datasets               |
-| 4    | ❄️ BigQuery | Create external tables and validate data availability                       |
-| 5    | ◈ dbt       | Build data models (staging → marts) and run tests for data quality          |
+| 1    | Bronze    | Ingest raw CSV data from source into Google Cloud Storage (data lake)       |
+| 2    | Silver    | Transform data using Apache Spark (cleaning, trimming, schema standardization) and store as Parquet |    
+| 3    | BigQuery | Create external tables and validate data availability                       |
+| 4    | DBT       | Build data models (staging → marts) and run tests for data quality          |
 
 ## Spark 
 
@@ -373,7 +372,7 @@ python spark-gcs.py
 ```
 ## GCS Bucket (Data Lake)
 
-After running the ingestion and Spark jobs, your cloud storage bucket will contain two main folders: raw and processed. The raw folder stores the original CSV data ingested directly from the data source without any modifications, serving as the initial data layer. Meanwhile, the processed folder contains data that has been transformed using Apache Spark, where each dataset is stored in its own folder in Parquet format, optimized for efficient querying and analytics.
+After running the ingestion and Spark jobs, your cloud storage bucket will contain two main folders: raw (bronze) and processed (silver). The raw folder stores the original CSV data ingested directly from the data source without any modifications, serving as the initial data layer. Meanwhile, the processed folder contains data that has been transformed using Apache Spark, where each dataset is stored in its own folder in Parquet format, optimized for efficient querying and analytics.
 
 **Raw Folder:**
 
