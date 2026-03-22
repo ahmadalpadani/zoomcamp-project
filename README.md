@@ -63,15 +63,17 @@ echo -e "POSTGRES_PASSWORD=your_password_here\nGEMINI_API_KEY=your_api_key_here"
 ```bash 
 docker-compose up
 ```
-Kestra UI will be available at http://localhost:8080 (login: admin@kestra.io / Admin1234!).
+Kestra UI will be available at http://localhost:8080 (login: admin@kestra.io / Admin1234).
 
-## Terraform 
+## Terraform (Infrastructure as Code)
+
+Terraform is an Infrastructure as Code (IaC) tool that allows you to define, provision, and manage your cloud resources using declarative configuration files instead of manual clicking in a web console.
 
 ### 1. Configure Terraform 
 
 ```bash
 cd terraform
-# Edit terraform.tfvars with your GCP project ID and bucket name
+# Edit terraform.tfvars with your GCP project ID and region
 ```
 
 ### 2. Run your Terraform 
@@ -81,7 +83,250 @@ terraform init
 terraform plan
 terraform apply
 ```
-Terraform will creates GCS Bucket (Datalake) named  and Bigquery Dataset (Data Warehouse)
+Terraform will creates GCS Bucket (Datalake) named "ammar-zoomcamp-project" and Bigquery Dataset (Data Warehouse) named "ecommerce_dataset"
+
+## Kestra (Ingestion and Workflow Orchestration)
+
+Open your Kestra IU at http://localhost:8080 (login: admin@kestra.io / Admin1234).
+
+### 1. Set your KV in Kestra 
+
+```yaml
+id: gcp_kv
+namespace: zoomcamp-project
+
+tasks:
+  - id: gcp_project_id
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_PROJECT_ID
+    kvType: STRING
+    value: ammar-zoomcamp # configure with your GCP project ID
+
+  - id: gcp_location
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_LOCATION
+    kvType: STRING
+    value: asia-southeast2 # configure with your location
+
+  - id: gcp_bucket_name
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_BUCKET_NAME
+    kvType: STRING
+    value: ammar-zoomcamp-project
+
+  - id: gcp_dataset
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_DATASET
+    kvType: STRING
+    value: ecommerce_dataset
+```
+### 2. Make your ingestion pipeline 
+
+```yaml
+id: ingest_kaggle_ecommerce
+namespace: zoomcamp-project
+
+description: |
+  Download Brazilian ecommerce dataset from Kaggle,
+  unzip it and upload CSV files to GCS raw layer.
+
+variables:
+  bucket: "{{kv('GCP_BUCKET_NAME')}}"
+
+tasks:
+  - id: extract
+    type: io.kestra.plugin.scripts.shell.Commands
+    taskRunner:
+      type: io.kestra.plugin.core.runner.Process
+    outputFiles:
+      - "*.csv"
+    commands:
+      - wget -O brazilian-ecommerce.zip https://www.kaggle.com/api/v1/datasets/download/olistbr/brazilian-ecommerce
+      - python -m zipfile -e brazilian-ecommerce.zip .
+      - ls -lah
+
+  - id: upload_orders
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{outputs.extract.outputFiles['olist_orders_dataset.csv']}}"
+    to: "gs://{{vars.bucket}}/raw/orders.csv"
+
+  - id: upload_customers
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{outputs.extract.outputFiles['olist_customers_dataset.csv']}}"
+    to: "gs://{{vars.bucket}}/raw/customers.csv"
+
+  - id: upload_products
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{outputs.extract.outputFiles['olist_products_dataset.csv']}}"
+    to: "gs://{{vars.bucket}}/raw/products.csv"
+
+  - id: upload_sellers
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{outputs.extract.outputFiles['olist_sellers_dataset.csv']}}"
+    to: "gs://{{vars.bucket}}/raw/sellers.csv"
+
+  - id: upload_order_items
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{outputs.extract.outputFiles['olist_order_items_dataset.csv']}}"
+    to: "gs://{{vars.bucket}}/raw/order_items.csv"
+
+  - id: upload_payments
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{outputs.extract.outputFiles['olist_order_payments_dataset.csv']}}"
+    to: "gs://{{vars.bucket}}/raw/payments.csv"
+
+  - id: upload_reviews
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{outputs.extract.outputFiles['olist_order_reviews_dataset.csv']}}"
+    to: "gs://{{vars.bucket}}/raw/reviews.csv"
+
+  - id: upload_geolocation
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{outputs.extract.outputFiles['olist_geolocation_dataset.csv']}}"
+    to: "gs://{{vars.bucket}}/raw/geolocation.csv"
+
+  - id: upload_category_translation
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{outputs.extract.outputFiles['product_category_name_translation.csv']}}"
+    to: "gs://{{vars.bucket}}/raw/product_category_translation.csv"
+
+triggers:
+  - id: schedule_ingestion
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 2 * * *"
+    timezone: Asia/Jakarta
+
+pluginDefaults:
+  - type: io.kestra.plugin.gcp
+    values:
+      projectId: "{{kv('GCP_PROJECT_ID')}}"
+```
+<img width="409" height="1161" alt="image" src="https://github.com/user-attachments/assets/d2815ee6-6035-4ffa-abdc-77d4becbf2a3" />
+
+### Make your workflow orchestration pipeline
+
+This pipeline help you to make external table in bigquery, running spark and dbt 
+
+```yaml
+id: olist_spark_gcs_pipeline
+namespace: zoomcamp-project
+description: End-to-end pipeline (Spark → BigQuery External Table → dbt)
+
+tasks:
+
+  # 1. Run Spark Job
+  - id: run_spark_job
+    type: io.kestra.plugin.scripts.python.Script
+    containerImage: python:3.11-slim
+
+    env:
+      GOOGLE_APPLICATION_CREDENTIALS: /app/keys/gcp-key.json
+      JAVA_HOME: /usr/lib/jvm/default-java
+
+    beforeCommands:
+      - apt-get update
+      - apt-get install -y default-jdk
+      - pip install pyspark
+      - pip install google-cloud-storage
+
+    
+
+    script: |
+
+      from pyspark.sql import SparkSession
+      import os
+
+      print("🚀 Starting Spark Session...")
+
+      spark = SparkSession.builder \
+          .appName('GCS-Connect') \
+          .config("spark.jars.packages", "com.google.cloud.bigdataoss:gcs-connector:hadoop3-2.2.15") \
+          .config("spark.hadoop.fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem") \
+          .config("spark.hadoop.fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS") \
+          .config("spark.hadoop.google.cloud.auth.service.account.enable", "true") \
+          .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", os.environ["GOOGLE_APPLICATION_CREDENTIALS"]) \
+          .getOrCreate()
+
+      print("✅ Spark Started")
+
+      from pyspark.sql import functions as F
+
+      tables = [
+          "customers",
+          "geolocation",
+          "order_items",
+          "payments",
+          "reviews",
+          "orders",
+          "products",
+          "sellers",
+          "product_category_translation"
+      ]
+
+      base_input = "gs://ammar-zoomcamp-project/raw"
+      base_output = "gs://ammar-zoomcamp-project/processed"
+
+      for table in tables:
+          try:
+              print(f"🔄 Memproses {table}...")
+
+              df = spark.read.option("header", "true").option("inferSchema", "true") \
+                  .csv(f"{base_input}/{table}.csv")
+
+              df = df.dropna(how='all')
+
+              for col_name, col_type in df.dtypes:
+                  if col_type == "string":
+                      df = df.withColumn(col_name, F.trim(F.col(col_name)))
+
+              df.write.mode("overwrite").parquet(f"{base_output}/{table}")
+
+              print(f"✅ {table} berhasil!")
+
+          except Exception as e:
+              print(f"❌ Error di {table}: {str(e)}")
+
+      print("🎉 Semua tabel selesai!")
+
+  # 2. Create External Tables di BigQuery
+  - id: create_bigquery_external_tables
+    type: io.kestra.plugin.gcp.bigquery.Query
+    projectId: "{{ kv('GCP_PROJECT_ID') }}"
+    serviceAccount: "{{ envs.KESTRA_GCP_JSON }}"
+    sql: |
+      {% set tables = [
+        "customers", "geolocation", "order_items", "payments",
+        "reviews", "orders", "products", "sellers", "product_category_translation"
+      ] %}
+
+      {% for table in tables %}
+      CREATE OR REPLACE EXTERNAL TABLE `{{ kv('GCP_PROJECT_ID') }}.{{ kv('GCP_DATASET') }}.ext_{{ table }}`
+      OPTIONS (
+        format = 'PARQUET',
+        uris = ['gs://{{ kv('GCS_BUCKET') }}/processed/{{ table }}/*.parquet']
+      );
+      {% endfor %}
+
+  # 3. Run dbt
+  - id: run_dbt
+    type: io.kestra.plugin.scripts.shell.Commands
+    containerImage: ghcr.io/dbt-labs/dbt-bigquery:1.7.0
+    env:
+      GOOGLE_APPLICATION_CREDENTIALS: /app/keys/gcp-key.json
+      DBT_PROFILES_DIR: /workspace/dbt/zoomcamp
+    commands:
+      - cd /workspace/dbt/zoomcamp
+      - dbt deps
+      - dbt run
+      - dbt test
+
+triggers:
+  - id: schedule
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 0 * * *"
+```
+
+<img width="501" height="927" alt="image" src="https://github.com/user-attachments/assets/2a13038a-6860-48ab-ab06-ba4063fd655f" />
 
 
 
