@@ -201,9 +201,8 @@ pluginDefaults:
     values:
       projectId: "{{kv('GCP_PROJECT_ID')}}"
 ```
-<img width="409" height="1161" alt="image" src="https://github.com/user-attachments/assets/d2815ee6-6035-4ffa-abdc-77d4becbf2a3" />
 
-### Make your workflow orchestration pipeline
+### 3. Make your workflow orchestration pipeline
 
 This pipeline help you to make external table in bigquery, running spark and dbt 
 
@@ -327,6 +326,54 @@ triggers:
 ```
 
 <img width="501" height="927" alt="image" src="https://github.com/user-attachments/assets/2a13038a-6860-48ab-ab06-ba4063fd655f" />
+
+## Spark 
+
+Apache Spark is a distributed data processing engine designed to handle large-scale data efficiently by processing it in parallel across multiple machines. It enables fast data transformations, analytics, and supports both batch and real-time data processing. With APIs in languages like Python, SQL, and Scala, Spark can work with structured and unstructured data, making it a powerful tool for turning raw data into clean, usable insights at scale.
+
+### 1. Install Spark in your Environtment Variables
+
+Step 1: Install Package 
+
+```bash 
+cd spark
+sudo apt update
+sudo apt install openjdk-17-jdk python3-pip python3-venv -y
+```
+
+Step 2: Make virtual environtment
+
+``bash 
+python3 -m venv ~/pyspark-zoomcamp-venv
+source ~/pyspark-zoomcamp-venv/bin/activate
+```
+
+Step 3: install package 
+
+```bash 
+pip install --upgrade pip
+pip install pyspark jupyter pandas pyarrow
+```
+
+### 2. Run your Spark (Distributed Computing)
+
+```bash 
+cd notebook
+python spark-gcs.py
+```
+## GCS Bucket (Data Lake)
+
+After running the ingestion and Spark jobs, your cloud storage bucket will contain two main folders: raw and processed. The raw folder stores the original CSV data ingested directly from the data source without any modifications, serving as the initial data layer. Meanwhile, the processed folder contains data that has been transformed using Apache Spark, where each dataset is stored in its own folder in Parquet format, optimized for efficient querying and analytics.
+
+**Raw Folder:**
+
+![alt text](image/image.png)
+
+**Processed Folder:**
+
+![alt text](image/image2.png)
+
+
 
 
 
