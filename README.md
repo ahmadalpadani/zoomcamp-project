@@ -384,6 +384,8 @@ After running the ingestion and Spark jobs, your cloud storage bucket will conta
 
 ## Data Build Tools (Transformation)
 
+dbt is a transformation tool that runs inside a data warehouse to turn raw data into clean, structured, and analytics-ready datasets using SQL, while enabling data modeling, testing, and documentation
+
 ### 1. Install DBT-Bigquery in your Environtment Variables
 
 Step 1: Make virtual environtment
@@ -491,3 +493,15 @@ models
         ├── fct_order_items.sql
         └── fct_orders.sql
 ```
+
+## Bigquery (Data Warehouse)
+
+A data warehouse like Google BigQuery serves as a centralized system for storing and querying large volumes of structured data for analytics and reporting. In this architecture, BigQuery acts as the storage and compute engine, while dbt is used on top of it to transform raw or processed data into business-ready tables such as fact and dimension models, making the data easier to analyze and use for decision-making.
+
+![alt text](image/image3.png)
+
+## Looker (Visualization and Dashboard)
+
+View Dashboard: https://lookerstudio.google.com/reporting/39fdfb77-0e24-45ad-bcec-8fa4db436c08  
+
+![alt text](image/image4.png)
