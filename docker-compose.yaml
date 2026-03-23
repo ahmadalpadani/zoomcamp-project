@@ -7,6 +7,34 @@ volumes:
 
 services:
 
+  dbt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dbt-container
+    ports:
+      - "5000:5000"  # Port untuk dbt
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/keys/gcp-key.json
+      - DBT_PROFILES_DIR=/app/dbt/zoomcamp
+    volumes:
+      - .:/app
+    command: ["bash", "-c", "/app/dbt/venv/bin/dbt run"]
+
+  spark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark-container
+    ports:
+      - "4040:4040"  # Spark UI untuk monitoring jobs
+      - "7077:7077"  # Spark master port
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/keys/gcp-key.json
+    volumes:
+      - .:/app
+    command: ["bash", "-c", "/app/spark/venv/bin/spark-submit /app/spark/notebook/spark-gcs.py"]
+
   kestra_postgres:
     image: postgres:16
     container_name: kestra_postgres

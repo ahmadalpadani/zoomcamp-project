@@ -31,6 +31,53 @@ By implementing this pipeline, Olist can identify underperforming regions and op
 - **Transformation Layer**: dbt (Data Build Tool)
 - **Visualization**: Looker Studio
 
+## Project Structure
+
+```bash
+zoomcamp-project/
+│
+├── dbt/
+│   ├── dbt-env/                     ← Virtual environment for dbt
+│   ├── logs/                        ← Logs for dbt
+│   ├── zoomcamp/
+│   │   ├── analyses/                ← Analysis and reports
+│   │   ├── dbt_packages/            ← Required dbt packages
+│   │   ├── macros/                  ← SQL macros for dbt
+│   │   ├── models/                  ← dbt models for staging, intermediate, and marts
+│   │   │   ├── intermediate/        ← Intermediate data processing
+│   │   │   ├── mart/                ← Data processing for marts (dimension, fact tables)
+│   │   │   └── staging/             ← Staging tables for transforming raw data
+│   │   ├── seeds/                   ← Data seeds for dbt
+│   │   └── snapshots/               ← Snapshots for dbt
+│   └── .env                         ← Environment variables for dbt
+│
+├── image/                           ← Folder for images or visual assets
+├── keys/                            ← API keys or credentials
+│   └── gcp-key.json                 ← GCP key for authentication
+│
+├── spark/
+│   ├── notebook/                    ← Folder for Spark notebooks
+│   │   ├── .ipynb_checkpoints/     ← Checkpoint folder for notebooks
+│   │   ├── spark-gcs.ipynb         ← Spark notebook for GCS
+│   │   ├── spark-gcs.py            ← Python script for GCS and Spark
+│
+├── terraform/                       ← Folder for Terraform configuration
+│   ├── .terraform/                  ← Terraform internal files
+│   ├── main.tf                      ← Main Terraform configuration
+│   ├── outputs.tf                   ← Terraform output configurations
+│   ├── providers.tf                 ← Terraform providers (GCP)
+│   ├── terraform.tfstate            ← Terraform state file
+│   ├── terraform.tfstate.backup    ← Terraform state backup file
+│   ├── terraform.tfvars             ← Terraform configuration variables
+│   ├── variables.tf                 ← Terraform variable definitions
+│   └── terraform.tfstate            ← Terraform state file
+│
+├── .env                             ← Environment variables for the application
+├── .gitignore                       ← Git ignore settings
+├── docker-compose.yml               ← Docker Compose configuration file
+├── README.md                        ← Project documentation
+```
+
 ## How to Run Project
 
 ### Prerequisites
@@ -437,7 +484,7 @@ Step 5: Test Connection
 dbt debug
 ```
 
-## 2. Run your dbt
+### 2. Run your dbt
 
 Step 1: Move to dbt project
 
