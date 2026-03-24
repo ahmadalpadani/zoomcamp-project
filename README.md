@@ -339,8 +339,6 @@ tasks:
       from pyspark.sql import SparkSession
       import os
 
-      print("🚀 Starting Spark Session...")
-
       spark = SparkSession.builder \
           .appName('GCS-Connect') \
           .config("spark.jars.packages", "com.google.cloud.bigdataoss:gcs-connector:hadoop3-2.2.15") \
@@ -349,8 +347,6 @@ tasks:
           .config("spark.hadoop.google.cloud.auth.service.account.enable", "true") \
           .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", os.environ["GOOGLE_APPLICATION_CREDENTIALS"]) \
           .getOrCreate()
-
-      print("✅ Spark Started")
 
       from pyspark.sql import functions as F
 
@@ -371,7 +367,6 @@ tasks:
 
       for table in tables:
           try:
-              print(f"🔄 Memproses {table}...")
 
               df = spark.read.option("header", "true").option("inferSchema", "true") \
                   .csv(f"{base_input}/{table}.csv")
@@ -384,12 +379,10 @@ tasks:
 
               df.write.mode("overwrite").parquet(f"{base_output}/{table}")
 
-              print(f"✅ {table} berhasil!")
-
           except Exception as e:
-              print(f"❌ Error di {table}: {str(e)}")
+              print(f"Error di {table}: {str(e)}")
 
-      print("🎉 Semua tabel selesai!")
+      print("Sucsess")
 
   # 2. Create External Tables di BigQuery
   - id: create_bigquery_external_tables
