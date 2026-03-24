@@ -32,6 +32,60 @@ By implementing this pipeline, Olist can identify underperforming regions and op
 - **Transformation Layer**: dbt (Data Build Tool)
 - **Visualization**: Looker Studio
 
+## Project Architecture
+
+```bash
+Kaggle Dataset (CSV)
+         │
+         ▼  [Kestra: ingest_kaggle_ecommerce]
+  GCS Bucket (Data Lake - Bronze)  ←──────────────────────────────
+  gs://ammar-zoomcamp-project/raw/                              │
+         │                                                      │
+         │  IaC: Terraform (GCS + BigQuery Dataset)             │
+         │  credentials: keys/gcp-key.json                      │
+         ▼                                                      │
+  [Kestra: run_spark_job]                                       │
+         │                                                      │
+         ▼                                                      │
+  GCS Bucket (Data Lake - Silver / Processed)                   │
+  gs://ammar-zoomcamp-project/processed/ (Parquet) ─────────────┘
+         │
+         ▼  [Kestra: create_bigquery_external_tables]
+  BigQuery External Tables
+  ecommerce_dataset.ext_*  (CSV)
+         │
+         ▼  [dbt: staging layer]
+  BigQuery Views:
+  stg_customers
+  stg_orders
+  stg_products
+  stg_payments
+  stg_reviews
+  stg_sellers
+         │
+         ▼  [dbt: intermediate layer]
+  BigQuery Tables:
+  int_order_enriched
+  int_order_items_products
+  int_order_items_geolocated
+  int_payments_pivoted
+  int_seller_performance
+         │
+         ▼  [dbt: mart layer]
+  BigQuery Analytics Tables
+      ┌───────────────────────────────┬───────────────────────────────┬───────────────────────────────┐
+      ▼                               ▼                               ▼                               ▼
+  dim_customers                dim_sellers                    fct_orders                    fct_order_items
+  (Dimension Table)            (Dimension Table)              (Fact Table)                  (Fact Table)
+      │                               │                               │                               │
+      └──────────────┬────────────────┴───────────────┬───────────────┴───────────────┬───────────────┘
+                     ▼                                ▼                               ▼
+              Business Metrics Layer (SQL / BI Ready Aggregations)
+                     │
+                     ▼
+             Looker Studio Dashboard
+```
+
 ## Project Structure
 
 ```bash
