@@ -22,6 +22,7 @@ By implementing this pipeline, Olist can identify underperforming regions and op
 
 ## Architecture & Technologies
 
+- **Cloud-based Development Environment**: Codespaces
 - **Cloud Platform**: Google Cloud Platform (GCP)
 - **Infrastructure as Code**: Terraform
 - **Workflow Orchestration**: Kestra
@@ -399,7 +400,7 @@ sudo apt install openjdk-17-jdk python3-pip python3-venv -y
 
 Step 2: Make virtual environtment
 
-``bash 
+```bash 
 python3 -m venv ~/pyspark-zoomcamp-venv
 source ~/pyspark-zoomcamp-venv/bin/activate
 ```
