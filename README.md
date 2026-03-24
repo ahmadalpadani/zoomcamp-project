@@ -20,6 +20,8 @@ This project builds a robust data platform to answer:
 
 By implementing this pipeline, Olist can identify underperforming regions and optimize their logistics partnership network.
 
+**Data Source:** https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce         
+
 ## Architecture & Technologies
 
 - **Cloud-based Development Environment**: Codespaces
