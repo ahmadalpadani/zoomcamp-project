@@ -146,7 +146,7 @@ zoomcamp-project/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com ahmadalpadani/zoomcamp-project.git
+git clone https://github.com/ahmadalpadani/zoomcamp-project.git
 cd zoomcamp-project
 ```
 ### 2. Create your GCP service account key and save it:
